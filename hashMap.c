@@ -167,7 +167,25 @@ int* hashMapGet(HashMap* map, const char* key)
 void resizeTable(HashMap* map, int capacity)
 {
     // FIXME: implement
+
+	// Create new map
+	HashMap * newMap = hashMapNew(capacity);
+
+	// Rehash links into newMap
+	for (int i = 0; i < map->capacity; i++)
+	{
+		HashLink* link = map->table[i];
+
+			while (link != NULL)	{
+				hashMapPut(newMap, link->key, link->value);
+				link = link->next;
+			}
+		}
+
+	// Delete old map
+	hashMapDelete(map);
 }
+
 
 /**
  * Updates the given key-value pair in the hash table. If a link with the given
@@ -185,6 +203,22 @@ void resizeTable(HashMap* map, int capacity)
 void hashMapPut(HashMap* map, const char* key, int value)
 {
     // FIXME: implement
+
+	int idx = HASH_FUNCTION(key) % (map->capacity);
+
+	HashLink* link = map->table[idx];
+
+	while (link != NULL) {
+		if (link->key == key) {
+			link->value = value;
+			map->size++;
+			return;
+		}
+		link = link->next;
+	}
+	link = hashLinkNew(key, value, (map->table[idx]->next));
+	map->table[idx] = link;
+	map->size++;
 }
 
 /**
@@ -197,6 +231,23 @@ void hashMapPut(HashMap* map, const char* key, int value)
 void hashMapRemove(HashMap* map, const char* key)
 {
     // FIXME: implement
+	int idx = HASH_FUNCTION(key) % (map->capacity);
+
+	HashLink* link = map->table[idx];
+	HashLink* prevLink = map->table[idx];
+
+	while (link != NULL) {
+		if (link->key == key) {
+			prevLink->next = link->next;
+			hashLinkDelete(link);
+			map->size--;
+			return;
+		}
+		prevLink = link;
+		link = link->next;
+
+	}
+
 }
 
 /**
@@ -212,7 +263,18 @@ void hashMapRemove(HashMap* map, const char* key)
 int hashMapContainsKey(HashMap* map, const char* key)
 {
     // FIXME: implement
-    return 0;
+	int idx = HASH_FUNCTION(key) % (map->capacity);
+
+	HashLink* link = map->table[idx];
+
+	while (link != NULL) {
+		if (link->key == key) {
+			return 1;
+		}
+		link = link->next;
+	}
+
+	return 0;
 }
 
 /**
@@ -245,6 +307,17 @@ int hashMapCapacity(HashMap* map)
 int hashMapEmptyBuckets(HashMap* map)
 {
     // FIXME: implement
+	int emptyBuckets = 0;
+
+	for (int i = 0; i < map->capacity; i++)
+	{
+		HashLink* link = map->table[i];
+		if (link == NULL) {
+			emptyBuckets++;
+		}
+	}
+
+	return emptyBuckets;
 
 }
 
