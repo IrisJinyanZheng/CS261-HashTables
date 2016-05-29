@@ -1,8 +1,8 @@
 /*
  * CS 261 Data Structures
  * Assignment 6
- * Name: 
- * Date: 
+ * Name: Megan Aldridge
+ * Date: May 29, 2016
  */
 
 #include "hashMap.h"
@@ -83,6 +83,22 @@ void hashMapInit(HashMap* map, int capacity)
 void hashMapCleanUp(HashMap* map)
 {
     // FIXME: implement
+	for (int i = 0; i < map->capacity; i++) {
+		HashLink* link = map->table[i];
+
+		while (link != NULL)
+		{
+			HashLink* temp = link;
+			link = link->next;
+			hashLinkDelete(temp);
+		}
+		
+	}
+
+	for (int i = 0; i < map->capacity; i++) {
+		free(map->table[i]);
+	}
+
 }
 
 /**
@@ -123,7 +139,18 @@ void hashMapDelete(HashMap* map)
 int* hashMapGet(HashMap* map, const char* key)
 {
     // FIXME: implement
-    return NULL;
+
+	int idx = HASH_FUNCTION(key) % (map->capacity);
+
+	HashLink* link = map->table[idx];
+
+		while (link != NULL) {
+			if (link->key == key) {
+				return link->value;
+			}
+				link = link->next;
+			}
+		return NULL;
 }
 
 /**
@@ -196,7 +223,7 @@ int hashMapContainsKey(HashMap* map, const char* key)
 int hashMapSize(HashMap* map)
 {
     // FIXME: implement
-    return 0;
+    return map->size;
 }
 
 /**
@@ -207,7 +234,7 @@ int hashMapSize(HashMap* map)
 int hashMapCapacity(HashMap* map)
 {
     // FIXME: implement
-    return 0;
+    return map->capacity;
 }
 
 /**
@@ -218,7 +245,7 @@ int hashMapCapacity(HashMap* map)
 int hashMapEmptyBuckets(HashMap* map)
 {
     // FIXME: implement
-    return 0;
+
 }
 
 /**
@@ -231,8 +258,13 @@ int hashMapEmptyBuckets(HashMap* map)
  */
 float hashMapTableLoad(HashMap* map)
 {
-    // FIXME: implement
-    return 0;
+	// FIXME: implement
+
+	float links = (float)map->size;
+	float buckets = (float)map->capacity;
+
+
+    return (links/buckets);
 }
 
 /**
