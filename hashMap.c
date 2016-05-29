@@ -146,7 +146,7 @@ int* hashMapGet(HashMap* map, const char* key)
 
 		while (link != NULL) {
 			if (link->key == key) {
-				return link->value;
+				return &(link->value);
 			}
 				link = link->next;
 			}
@@ -204,9 +204,15 @@ void hashMapPut(HashMap* map, const char* key, int value)
 {
     // FIXME: implement
 
+	
 	int idx = HASH_FUNCTION(key) % (map->capacity);
 
 	HashLink* link = map->table[idx];
+	HashLink* nxtLink = NULL;
+	
+	if (link != NULL) {
+		nxtLink = link->next;
+	}
 
 	while (link != NULL) {
 		if (link->key == key) {
@@ -216,7 +222,12 @@ void hashMapPut(HashMap* map, const char* key, int value)
 		}
 		link = link->next;
 	}
-	link = hashLinkNew(key, value, (map->table[idx]->next));
+	link = map->table[idx];
+
+	printf("link %p and key %c and value %d and nextLink %p", link, *key, value, nxtLink);
+
+
+	link = hashLinkNew(key, value, nxtLink);
 	map->table[idx] = link;
 	map->size++;
 }
