@@ -217,16 +217,11 @@ void hashMapPut(HashMap* map, const char* key, int value)
 	while (link != NULL) {
 		if (link->key == key) {
 			link->value = value;
-			map->size++;
 			return;
 		}
 		link = link->next;
 	}
 	link = map->table[idx];
-
-	printf("link %p and key %c and value %d and nextLink %p", link, *key, value, nxtLink);
-
-
 	link = hashLinkNew(key, value, nxtLink);
 	map->table[idx] = link;
 	map->size++;
