@@ -14,6 +14,7 @@
 
 int hashFunction1(const char* key)
 {
+
     int r = 0;
     for (int i = 0; key[i] != '\0'; i++)
     {

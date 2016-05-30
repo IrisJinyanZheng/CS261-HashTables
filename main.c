@@ -1,3 +1,5 @@
+
+#define _CRT_SECURE_NO_WARNINGS
 #include "hashMap.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -57,11 +59,14 @@ char* nextWord(FILE* file)
 int main(int argc, const char** argv)
 {
     // FIXME: implement
-    const char* fileName = "input1.txt";
-    if (argc > 1)
+    
+	const char* fileName = "input1.txt";
+    
+	if (argc > 1)
     {
         fileName = argv[1];
     }
+	
     printf("Opening file: %s\n", fileName);
     
     clock_t timer = clock();
@@ -70,6 +75,57 @@ int main(int argc, const char** argv)
     
     // --- Concordance code begins here ---
     // Be sure to free the word after you are done with it here.
+
+
+	// Assign file pointer to fileName for 'reading'
+	FILE * fp;
+	fp = fopen(fileName, "r");
+
+	// If file not found
+	if (fp == NULL) {
+		perror("Error");
+	}
+
+	// Iterate through file and analyze words
+
+	char * word = nextWord(fp);
+
+	while (word != NULL) {
+		//char * nxtWord = nextWord(fp);
+
+		char * lowCase = _strlwr(word);
+
+		if (hashMapContainsKey(map, word)) {
+			int occur = *(hashMapGet(map, word));
+			hashMapPut(map, word, ++occur);
+		}
+		else {
+			hashMapPut(map, word, 1);
+		}
+
+		free(word);
+		word = nextWord(fp);
+	}
+	
+	
+	// Close file
+	fclose(fp);
+
+	// Print all words and occurrence counts in the hash map
+	for (int i = 0; i < map->capacity; i++)
+	{
+		HashLink* link = map->table[i];
+		if (link != NULL)
+		{
+			while (link != NULL)
+			{
+				printf(" %s: %d \n", link->key, link->value);
+				link = link->next;
+			}
+		}
+	}
+
+
     // --- Concordance code ends here ---
     
     hashMapPrint(map);
@@ -82,5 +138,7 @@ int main(int argc, const char** argv)
     printf("Table load: %f\n", hashMapTableLoad(map));
     
     hashMapDelete(map);
+
+
     return 0;
 }
