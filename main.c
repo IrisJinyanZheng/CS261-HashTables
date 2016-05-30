@@ -13,6 +13,17 @@
  * @param file
  * @return Allocated string or NULL.
  */
+
+char toLowerCase(char c) {
+
+		if (c >= 'A' && c <= 'Z') {
+			c = c + 32;
+			// If upper case, return lowercase
+			return c;
+		}
+
+	return c;
+}
 char* nextWord(FILE* file)
 {
     int maxLength = 16;
@@ -26,6 +37,14 @@ char* nextWord(FILE* file)
             (c >= 'a' && c <= 'z') ||
             c == '\'')
         {
+			
+			// Implementation Added to Convert Upper case to Lower case 
+			if (c >= 'A' && c <= 'Z') {
+				// Convert case of character
+				c = toLowerCase(c);
+			}
+			
+
             if (length + 1 >= maxLength)
             {
                 maxLength *= 2;
@@ -91,9 +110,6 @@ int main(int argc, const char** argv)
 	char * word = nextWord(fp);
 
 	while (word != NULL) {
-		//char * nxtWord = nextWord(fp);
-
-		char * lowCase = _strlwr(word);
 
 		if (hashMapContainsKey(map, word)) {
 			int occur = *(hashMapGet(map, word));
@@ -110,6 +126,7 @@ int main(int argc, const char** argv)
 	
 	// Close file
 	fclose(fp);
+
 
 	// Print all words and occurrence counts in the hash map
 	for (int i = 0; i < map->capacity; i++)
