@@ -1,3 +1,6 @@
+
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "hashMap.h"
 #include <assert.h>
 #include <time.h>
@@ -51,9 +54,48 @@ char* nextWord(FILE* file)
  * @param file
  * @param map
  */
+
+/* Code Source Cited: 
+URL: http://stackoverflow.com/questions/7700400/whats-a-good-hash-function-for-english-words
+
+I have copied this code from stack exchange to ensure that my Hash Map would hash quickly into an 
+appropriate number of buckets for a larger set of links (ie. the english language). 
+
+The code includes a "seed", and a hash equation
+*/
+unsigned long hashstring(unsigned char *str) {
+	unsigned long hash = 5381;
+	int c;
+
+	while (c = *str++) {
+		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+	}
+
+	return hash;
+}
+
 void loadDictionary(FILE* file, HashMap* map)
 {
     // FIXME: implement
+	char * word = nextWord(file);
+
+	while (word != NULL) {
+		unsigned long hash = hashstring(word);
+
+		if (hashMapContainsKey(map, word)) {
+			// Word in dictionary already
+		}
+		else {
+			// Add word to dictionary 
+			hashMapPut(map, word, hash);
+		}
+		free(word);
+		word = nextWord(file);
+	}
+
+	printf("printing dictionary\n");
+	hashMapPrint(map);
 }
 
 /**
@@ -66,10 +108,16 @@ void loadDictionary(FILE* file, HashMap* map)
  */
 int main(int argc, const char** argv)
 {
+
+
     // FIXME: implement
     HashMap* map = hashMapNew(1000);
     
     FILE* file = fopen("dictionary.txt", "r");
+	// If file not found
+	if (file == NULL) {
+		perror("Error");
+	}
     clock_t timer = clock();
     loadDictionary(file, map);
     timer = clock() - timer;
@@ -84,6 +132,12 @@ int main(int argc, const char** argv)
         scanf("%s", inputBuffer);
         
         // Implement the spell checker code here..
+		if (hashMapContainsKey(map, inputBuffer)) {
+			printf("That word is spelled correctly!\n");
+		}
+		else {
+			printf("That word is mispelled\n");
+		}
         
         if (strcmp(inputBuffer, "quit") == 0)
         {
