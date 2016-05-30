@@ -171,7 +171,6 @@ void resizeTable(HashMap* map, int capacity)
     // FIXME: implement
 
 	// Save old Map information
-	int oldSize = map->size;
 	int oldCap = map->capacity;
 	HashLink ** oldTable = map->table;
 
