@@ -5,6 +5,7 @@
  * Date: May 29, 2016
  */
 
+#define _CRT_SECURE_NO_WARNINGS
 #include "hashMap.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -85,6 +86,7 @@ void hashMapCleanUp(HashMap* map)
     // FIXME: implement
 	for (int i = 0; i < map->capacity; i++) {
 		HashLink* link = map->table[i];
+		map->table[i] = NULL;
 
 		while (link != NULL)
 		{
@@ -92,11 +94,9 @@ void hashMapCleanUp(HashMap* map)
 			link = link->next;
 			hashLinkDelete(temp);
 		}
-		
-	}
 
-	for (int i = 0; i < map->capacity; i++) {
 		free(map->table[i]);
+		
 	}
 
 }
@@ -145,7 +145,7 @@ int* hashMapGet(HashMap* map, const char* key)
 	HashLink* link = map->table[idx];
 
 		while (link != NULL) {
-			if (link->key == key) {
+			if (strcmp(link->key, key) == 0) {
 				return &(link->value);
 			}
 				link = link->next;
@@ -168,6 +168,41 @@ void resizeTable(HashMap* map, int capacity)
 {
     // FIXME: implement
 
+	int oldSize = map->size;
+	int oldCap = map->capacity;
+	HashLink ** oldTable = map->table;
+
+	hashMapInit(map, capacity);
+
+	for (int i = 0; i < oldCap; i++) {
+		HashLink * link = oldTable[i];
+
+		while (link != NULL) {
+			hashMapPut(map, link->key, link->value);
+			link = link->next;
+		}
+	}
+	printf("New Map: \n");
+	hashMapPrint(map);
+
+	// Free old table
+	for (int i = 0; i < oldCap; i++) {
+		HashLink* link = oldTable[i];
+		oldTable[i] = NULL;
+
+		while (link != NULL)
+		{
+			HashLink* temp = link;
+			link = link->next;
+			hashLinkDelete(temp);
+		}
+
+		free(oldTable[i]);
+
+	}
+
+	/*
+
 	// Create new map
 	HashMap * newMap = hashMapNew(capacity);
 
@@ -182,10 +217,26 @@ void resizeTable(HashMap* map, int capacity)
 			}
 		}
 
-	// Delete old map
-	hashMapDelete(map);
-}
+	printf("New map:\n");
+	hashMapPrint(newMap);
+	
 
+	// Swap table pointers
+
+	HashLink ** temp = map->table;
+	map->table = newMap->table;
+	newMap->table = temp;
+
+	// Swap capacity
+
+	map->capacity = newMap->capacity; 
+
+	// Free tempMap
+
+	//hashMapCleanUp(newMap);
+	*/
+
+}
 
 /**
  * Updates the given key-value pair in the hash table. If a link with the given
@@ -204,9 +255,58 @@ void hashMapPut(HashMap* map, const char* key, int value)
 {
     // FIXME: implement
 
-	
+	// Compute index
 	int idx = HASH_FUNCTION(key) % (map->capacity);
+	if (idx < 0) {
+		idx += map->capacity;
+	}
 
+	//printf("Idx is %d\n", idx);
+	//printf("Key is %c\n", *key);
+	//printf("Value is %d\n", value);
+
+	// Add to bucket
+
+	HashLink* link = map->table[idx];
+	HashLink* newLink = NULL;
+
+	//printf("Link is %p\n", link);
+
+	if (link == NULL) {
+		// Bucket is currently empty
+		newLink= hashLinkNew(key, value, NULL);
+		map->table[idx] = newLink;
+		map->size++;
+		return;
+	}
+
+	else {
+		// Bucket contains at least one link
+		while (link != NULL) {
+
+			if (strcmp(link->key, key) == 0) {
+				// Link with given key already exists
+				link->value = value;
+				return;
+			}
+
+			link = link->next;
+		}
+
+		// Link with given key does not already exist, create new Link
+		newLink = hashLinkNew(key, value, map->table[idx]);
+		map->table[idx] = newLink;
+		map->size++;
+		return;
+
+	}
+
+
+
+	//printf("New Link:\n");
+	//printf("Link = %p, Addr of link = %p, link->value = %d, Link->key = %c, Link->next = %p\n", newLink, &newLink, newLink->value, *(newLink->key), newLink->next);
+
+	/*
 	HashLink* link = map->table[idx];
 	HashLink* nxtLink = NULL;
 	
@@ -221,10 +321,15 @@ void hashMapPut(HashMap* map, const char* key, int value)
 		}
 		link = link->next;
 	}
+	*/
+
+	/*
 	link = map->table[idx];
 	link = hashLinkNew(key, value, nxtLink);
 	map->table[idx] = link;
 	map->size++;
+	printf("here");
+	*/
 }
 
 /**
@@ -236,14 +341,56 @@ void hashMapPut(HashMap* map, const char* key, int value)
  */
 void hashMapRemove(HashMap* map, const char* key)
 {
-    // FIXME: implement
+	// FIXME: implement
+
+	if (!hashMapContainsKey(map, key)) {
+		printf("Not in map\n");
+		return;
+	}
+
 	int idx = HASH_FUNCTION(key) % (map->capacity);
 
-	HashLink* link = map->table[idx];
+	HashLink* cur = map->table[idx];
+	HashLink* last = map->table[idx];
+
+	if (cur == NULL) {
+		printf("No links in bucket to remove\n");
+	}
+
+	while (cur != NULL) {
+		if (strcmp(cur->key, key) == 0) {
+			printf("Found key/link to remove\n");
+
+			if (cur == map->table[idx]) {
+				// Link to remove is first link
+				printf("Link to remove is first link\n");
+				map->table[idx] = cur->next;
+				hashLinkDelete(cur);
+				map->size--;
+				cur = 0;
+			}
+			else {
+				last->next = cur->next;
+				hashLinkDelete(cur);
+				map->size--;
+				cur = 0;
+			}
+		}
+
+		else {
+			last = cur;
+			cur = cur->next;
+		}
+	}
+	printf("After deleting: \n");
+	hashMapPrint(map);
+}
+
+	/*
 	HashLink* prevLink = map->table[idx];
 
 	while (link != NULL) {
-		if (link->key == key) {
+		if (strcmp(link->key, key) == 0) {
 			prevLink->next = link->next;
 			hashLinkDelete(link);
 			map->size--;
@@ -254,7 +401,9 @@ void hashMapRemove(HashMap* map, const char* key)
 
 	}
 
-}
+
+	*/
+
 
 /**
  * Returns 1 if a link with the given key is in the table and 0 otherwise.
@@ -274,7 +423,7 @@ int hashMapContainsKey(HashMap* map, const char* key)
 	HashLink* link = map->table[idx];
 
 	while (link != NULL) {
-		if (link->key == key) {
+		if (strcmp(link->key, key) == 0) {
 			return 1;
 		}
 		link = link->next;
@@ -365,5 +514,5 @@ void hashMapPrint(HashMap* map)
             }
         }
     }
-    printf("\n");
+    printf("Escaped!\n");
 }
