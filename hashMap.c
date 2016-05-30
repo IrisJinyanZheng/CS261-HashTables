@@ -99,6 +99,8 @@ void hashMapCleanUp(HashMap* map)
 		
 	}
 
+	free(map->table);
+
 }
 
 /**
@@ -301,35 +303,6 @@ void hashMapPut(HashMap* map, const char* key, int value)
 
 	}
 
-
-
-	//printf("New Link:\n");
-	//printf("Link = %p, Addr of link = %p, link->value = %d, Link->key = %c, Link->next = %p\n", newLink, &newLink, newLink->value, *(newLink->key), newLink->next);
-
-	/*
-	HashLink* link = map->table[idx];
-	HashLink* nxtLink = NULL;
-	
-	if (link != NULL) {
-		nxtLink = link->next;
-	}
-
-	while (link != NULL) {
-		if (link->key == key) {
-			link->value = value;
-			return;
-		}
-		link = link->next;
-	}
-	*/
-
-	/*
-	link = map->table[idx];
-	link = hashLinkNew(key, value, nxtLink);
-	map->table[idx] = link;
-	map->size++;
-	printf("here");
-	*/
 }
 
 /**
@@ -385,25 +358,6 @@ void hashMapRemove(HashMap* map, const char* key)
 	printf("After deleting: \n");
 	hashMapPrint(map);
 }
-
-	/*
-	HashLink* prevLink = map->table[idx];
-
-	while (link != NULL) {
-		if (strcmp(link->key, key) == 0) {
-			prevLink->next = link->next;
-			hashLinkDelete(link);
-			map->size--;
-			return;
-		}
-		prevLink = link;
-		link = link->next;
-
-	}
-
-
-	*/
-
 
 /**
  * Returns 1 if a link with the given key is in the table and 0 otherwise.
