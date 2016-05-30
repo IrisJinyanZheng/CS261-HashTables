@@ -223,6 +223,12 @@ void hashMapPut(HashMap* map, const char* key, int value)
 {
     // FIXME: implement
 
+	// Resize table if exceeds MAX_TABLE_LOAD
+	if (hashMapTableLoad(map) >= MAX_TABLE_LOAD) {
+		resizeTable(map, 2 * map->capacity);
+	}
+	
+
 	// Compute index
 	int idx = HASH_FUNCTION(key) % (map->capacity);
 	if (idx < 0) {
