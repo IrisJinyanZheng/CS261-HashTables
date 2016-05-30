@@ -81,6 +81,8 @@ void loadDictionary(FILE* file, HashMap* map)
 	char * word = nextWord(file);
 
 	while (word != NULL) {
+		
+		// Compute hash value
 		unsigned long hash = hashstring(word);
 
 		if (hashMapContainsKey(map, word)) {
@@ -94,8 +96,8 @@ void loadDictionary(FILE* file, HashMap* map)
 		word = nextWord(file);
 	}
 
-	printf("printing dictionary\n");
-	hashMapPrint(map);
+	//printf("printing dictionary\n");
+	//hashMapPrint(map);
 }
 
 /**
@@ -136,7 +138,7 @@ int main(int argc, const char** argv)
 			printf("That word is spelled correctly!\n");
 		}
 		else {
-			printf("That word is mispelled\n");
+			printf("That word is mispelled!\n");
 		}
         
         if (strcmp(inputBuffer, "quit") == 0)
